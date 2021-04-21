@@ -14,7 +14,7 @@ const submitSuccess = async (e: any) => {
   };
 
   const res = await Axios.get(
-    "http://223.33.165.165:5000/auth?memberType=0&id=test&password=test"
+    "http://localhost:5000/auth?memberType=0&id=test&password=test"
   );
   console.log(res);
 };
