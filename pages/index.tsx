@@ -3,36 +3,39 @@ import Head from "next/head";
 import styled, { css, createGlobalStyle } from "styled-components";
 import router from "next/router";
 import Axios from "axios";
-
-const submitSuccess = async (e: any) => {
-  e.preventDefault();
-  const { id, pw } = e.target;
-  const data = {
-    memberType: 0, //0: guest
-    id: id.value,
-    password: pw.value,
-  };
-
-  const res = await Axios.get(
-    "http://localhost:5000/auth?memberType=0&id=test&password=test"
-  );
-  console.log(res);
-};
+import styles from "./index.module.scss";
 
 type State = {
   loginTab: boolean; //0: Temp, 1: Member
+  token: string | null;
 };
 const index = () => {
   const [state, setState] = useState<State>({
     loginTab: false,
+    token: null,
   });
 
   useEffect(() => {}, []);
+
+  const submitSuccess = async (e: any) => {
+    e.preventDefault();
+    const { id, pw } = e.target;
+    if (id.value == "") return;
+    const data = {
+      memberType: 0, //0: guest
+      id: id?.value ?? null,
+      password: pw?.value ?? null,
+    };
+
+    const res = await Axios.get("http://localhost:5000/auth", { params: data });
+    state.token = res.data;
+    console.log(state.token);
+  };
+
   return (
     <>
-      <PageStyle />
-      <header className="header"></header>
-      <section className="title">
+      <header className={styles.header}></header>
+      <section className={styles.title}>
         <div style={{ marginRight: "auto", marginBottom: "10px" }}>
           welcome to Your Visiting~
         </div>
@@ -40,110 +43,50 @@ const index = () => {
           It's for everyone to Communicate
         </div>
       </section>
-      <LoginSection className="login">
+      <section className={styles.login}>
         <form onSubmit={(e: any) => submitSuccess(e)}>
           <ul
-            className="tabWrap"
+            className={styles.tabWrap}
             onClick={() => setState((v) => ({ ...v, loginTab: !v.loginTab }))}
           >
-            <li className={`tab ${state.loginTab ? "on" : ""}`}>Temp</li>
-            <li className={`tab ${!state.loginTab ? "on" : ""}`}>Login</li>
+            <li
+              className={`${styles.tab} ${
+                state.loginTab ? `${styles.on}` : ""
+              }`}
+            >
+              Temp
+            </li>
+            <li
+              className={`${styles.tab} ${
+                !state.loginTab ? `${styles.on}` : ""
+              }`}
+            >
+              Login
+            </li>
           </ul>
-          <div className="loginContentWrap">
+          <div className={styles.loginContentWrap}>
+            <input
+              className={`${styles.loginContent} ${styles.inputId}`}
+              placeholder="Type Your ID"
+              name="id"
+            />
+
             {state.loginTab && (
               <input
-                className="loginContent inputId"
-                placeholder="Type Your ID"
-                name="id"
+                className={`${styles.loginContent} ${styles.inputPassword}`}
+                placeholder="Type Your PassWord"
+                name="pw"
               />
             )}
-            <input
-              className="loginContent inputPassword"
-              placeholder="Type Your PassWord"
-              name="pw"
-            />
           </div>
-          <button type="submit" className="loginButton">
+          <button type="submit" className={styles.loginButton}>
             Enter
           </button>
         </form>
-      </LoginSection>
-      <footer className="footer"></footer>
+      </section>
+      <footer className={styles.footer}></footer>
     </>
   );
 };
 
 export default index;
-
-const PageStyle = createGlobalStyle`
-  .title {
-    margin: 100px 10px 0;
-    display:flex;
-    flex-direction:column;
-  }
-  .header {
-  }
-  .tabWrap {
-    display: flex;
-    .tab {
-      text-align: center;
-      display:flex;
-      flex-direction: column;
-      justify-content: center;
-      width:131px;
-      height:40px;
-      background-color:#FFF4D9;
-      border-bottom:black 2px solid;
-    }
-    .tab.on{
-      background-color:#FFDD85;
-    }
-    .tab+.tab{
-      border-left:black 2px solid;
-    }
-  }
-  .loginTab {
-    display: flex;
-  }
-  .inputId {
-    display: block;
-  }
-  .inputPassword {
-    display: block;
-  }
- 
-  .loginButton{
-    background-color:#FFF4D9;
-    width:100%;
-    height:42px;
-    border:none;
-    border-top:black 2px solid;
-    border-bottom:black 2px solid;
-  }
-`;
-
-const LoginSection = styled.section`
-  &.login {
-    background-color: #fff4d9;
-    display: block;
-    width: 262px;
-    height: 205px;
-    margin: 93px auto;
-  }
-  .loginContentWrap {
-    height: 125px;
-    display: flex;
-    flex-direction: column;
-
-    align-items: center; // column 가로
-    justify-content: center; // column 세로
-    .loginContent {
-      text-align: center;
-      width: 151px;
-      height: 23px;
-    }
-    .inputPassword {
-      margin-top: 5px;
-    }
-  }
-`;
