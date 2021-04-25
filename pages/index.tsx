@@ -4,6 +4,7 @@ import styled, { css, createGlobalStyle } from "styled-components";
 import router from "next/router";
 import Axios from "axios";
 import styles from "./index.module.scss";
+import { API } from "config";
 
 type State = {
   loginTab: boolean; //0: Temp, 1: Member
@@ -16,7 +17,6 @@ const index = () => {
   });
 
   useEffect(() => {}, []);
-
   const submitSuccess = async (e: any) => {
     e.preventDefault();
     const { id, pw } = e.target;
@@ -27,21 +27,21 @@ const index = () => {
       password: pw?.value ?? null,
     };
 
-    const res = await Axios.get("http://localhost:5000/auth", { params: data });
+    const res = await Axios.get(`${API}/auth`, {
+      params: data,
+    });
     state.token = res.data;
     console.log(state.token);
   };
-
+  console.log(state.loginTab);
   return (
     <>
       <header className={styles.header}></header>
       <section className={styles.title}>
-        <div style={{ marginRight: "auto", marginBottom: "10px" }}>
+        <div style={{ marginRight: "auto", marginBottom: "1d0px" }}>
           welcome to Your Visiting~
         </div>
-        <div style={{ marginLeft: "auto" }}>
-          It's for everyone to Communicate
-        </div>
+        <div style={{ marginLeft: "auto" }}>It's for everyone to Communicate</div>
       </section>
       <section className={styles.login}>
         <form onSubmit={(e: any) => submitSuccess(e)}>
@@ -49,18 +49,10 @@ const index = () => {
             className={styles.tabWrap}
             onClick={() => setState((v) => ({ ...v, loginTab: !v.loginTab }))}
           >
-            <li
-              className={`${styles.tab} ${
-                state.loginTab ? `${styles.on}` : ""
-              }`}
-            >
-              Temp
+            <li className={`${styles.tab} ${state.loginTab ? `${styles.on}` : ""}`}>
+              Guest
             </li>
-            <li
-              className={`${styles.tab} ${
-                !state.loginTab ? `${styles.on}` : ""
-              }`}
-            >
+            <li className={`${styles.tab} ${!state.loginTab ? `${styles.on}` : ""}`}>
               Login
             </li>
           </ul>
@@ -71,7 +63,7 @@ const index = () => {
               name="id"
             />
 
-            {state.loginTab && (
+            {!state.loginTab && (
               <input
                 className={`${styles.loginContent} ${styles.inputPassword}`}
                 placeholder="Type Your PassWord"
