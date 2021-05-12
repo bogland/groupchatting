@@ -5,18 +5,30 @@ import router from "next/router";
 import Axios from "axios";
 import styles from "./index.module.scss";
 import { API } from "config";
+import { useDispatch, useSelector } from "react-redux";
+import { RootReducerType } from "components/store/RootReducer";
+import { setAuth } from "components/reducers/AuthReducer";
 
 type State = {
   loginTab: boolean; //0: Temp, 1: Member
   token: string | null;
 };
 const index = () => {
+  const auth = useSelector((state: RootReducerType) => state.auth);
+  const dispatch = useDispatch();
+
   const [state, setState] = useState<State>({
     loginTab: false,
     token: null,
   });
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (localStorage.token) {
+      dispatch(setAuth({ token: localStorage.token }));
+      router.push("/chatList");
+    }
+  }, []);
+
   const submitSuccess = async (e: any) => {
     e.preventDefault();
     const { id, pw } = e.target;
@@ -30,8 +42,13 @@ const index = () => {
     const res = await Axios.get(`${API}/auth`, {
       params: data,
     });
-    state.token = res.data;
-    console.log(state.token);
+    console.log("auth api get", res);
+
+    if (res.status != 200) return;
+    const token = res.data.data;
+    dispatch(setAuth({ token: token }));
+    localStorage.token = token;
+    router.push("/chatList");
   };
   console.log(state.loginTab);
   return (
