@@ -20,7 +20,6 @@ const chatlist = () => {
               <span className={styles.makerID}>홍길동</span>
             </div>
           </li>
-
           <li className={styles.room}>
             <div className={styles.headerWrap}>
               <span className={styles.category}>#취미</span>
@@ -35,7 +34,6 @@ const chatlist = () => {
               <span className={styles.makerID}>홍길동</span>
             </div>
           </li>
-
           <li className={styles.room}>
             <div className={styles.headerWrap}>
               <span className={styles.category}>#취미</span>

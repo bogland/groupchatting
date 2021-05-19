@@ -1,0 +1,14 @@
+@import "/public/css/main.scss";
+
+// $deviceWidth: 375;
+// $height: 27px;
+
+.container{
+  width:100%;
+  height:50px;
+  background-color:black;
+  .iconGNB{
+    width: calc(39 / #{$deviceWidth}* 100vw);
+    height: $height;
+  }
+}
