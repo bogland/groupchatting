@@ -1,0 +1,31 @@
+$mobileWidth: 450px;
+
+.wrap {
+  max-width: $mobileWidth;
+  background-color: yellow;
+  height: 100vh;
+
+  margin: 0 auto;
+  .container {
+    width: calc(100% - 50px);
+    height: 100%;
+    background-color: red;
+    margin: 0 auto;
+    .tableContainer {
+      background-color: blue;
+      padding: 10px 10px;
+      .title {
+        background-color: pink;
+      }
+      .content {
+        background-color: honeydew;
+      }
+    }
+  }
+}
+
+.header {
+  width: 100%;
+  height: 50px;
+  background-color: green;
+}

@@ -7,6 +7,8 @@ const Header = (props: Props) => {
     <>
       <section className={styles.container}>
         <img className={styles.iconGNB} src="/image/ic_gnb.png" />
+        <span className={styles.title}>타이틀</span>
+        <span></span>
       </section>
     </>
   );

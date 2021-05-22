@@ -3,7 +3,7 @@ $deviceWidth: 375;
 $height: 27px;
 
 .roomContainer {
-  width: calc(335 / #{$deviceWidth}* 100vw);
+  width: calc(335 / #{$deviceWidth}* 100%);
   margin: 18px auto 0;
 
   .room {
@@ -26,6 +26,7 @@ $height: 27px;
       border-bottom: solid 0.5px;
 
       height: $height;
+      line-height: $height;
       font-size: 1rem;
     }
 
@@ -44,7 +45,7 @@ $height: 27px;
           border-radius: 80px;
 
           padding: 5px 7px;
-          margin-left: calc(5 / #{$deviceWidth}* 100vw);
+          margin-left: 5px;
         }
       }
     }

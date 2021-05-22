@@ -131,3 +131,7 @@ table {
 html {
   font-size: 18px;
 }
+
+body {
+  min-width: 300px;
+}

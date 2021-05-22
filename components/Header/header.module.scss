@@ -3,12 +3,21 @@
 // $deviceWidth: 375;
 // $height: 27px;
 
-.container{
-  width:100%;
-  height:50px;
-  background-color:black;
-  .iconGNB{
-    width: calc(39 / #{$deviceWidth}* 100vw);
-    height: $height;
+.container {
+  width: 100%;
+  height: 50px;
+  background-color: black;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  .iconGNB {
+    position: absolute;
+    left: 8px;
+    width: 39px;
+    height: 27px;
+  }
+  .title {
+    color: white;
   }
 }
