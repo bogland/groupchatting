@@ -4,10 +4,13 @@ import styled, { css, createGlobalStyle } from "styled-components";
 import router from "next/router";
 import Axios from "axios";
 import styles from "./index.module.scss";
-import { API } from "config";
+import { APIURI } from "config";
 import { useDispatch, useSelector } from "react-redux";
 import { RootReducerType } from "components/store/RootReducer";
 import { setAuth } from "components/reducers/AuthReducer";
+import { setHeader } from "components/reducers/UIReducer";
+import { authentication, checkAuth } from "components/services/authService";
+import { ErrorCode } from "components/services/model";
 
 type State = {
   loginTab: boolean; //0: Temp, 1: Member
@@ -16,41 +19,44 @@ type State = {
 const index = () => {
   const auth = useSelector((state: RootReducerType) => state.auth);
   const dispatch = useDispatch();
-
   const [state, setState] = useState<State>({
     loginTab: false,
     token: null,
   });
 
   useEffect(() => {
-    if (localStorage.token) {
-      dispatch(setAuth({ token: localStorage.token }));
-      router.push("/chatList");
-    }
+    dispatch(setHeader({ title: "로그인" }));
+    authenticate();
   }, []);
+
+  const authenticate = async () => {
+    const token = localStorage.token;
+    if (token == null) return;
+
+    const res = await checkAuth(token);
+    if (res.errorCode == ErrorCode.Error) return;
+    dispatch(setAuth({ token: localStorage.token }));
+    router.push("/chatList");
+  };
 
   const submitSuccess = async (e: any) => {
     e.preventDefault();
     const { id, pw } = e.target;
     if (id.value == "") return;
+
     const data = {
       memberType: 0, //0: guest
       id: id?.value ?? null,
       password: pw?.value ?? null,
     };
+    const res = await authentication(data);
 
-    const res = await Axios.get(`${API}/auth`, {
-      params: data,
-    });
-    console.log("auth api get", res);
-
-    if (res.status != 200) return;
-    const token = res.data.data;
+    if (res.errorCode == ErrorCode.Error) return;
+    const token = res.data;
     dispatch(setAuth({ token: token }));
     localStorage.token = token;
     router.push("/chatList");
   };
-  console.log(state.loginTab);
   return (
     <>
       <header className={styles.header}></header>
