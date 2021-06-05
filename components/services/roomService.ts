@@ -9,6 +9,7 @@ export type T_ROOM = {
   ROOM_NAME: string;
   CREATE_AT: Date;
   DURING: number;
+  END_AT: Date;
 };
 
 export type RoomInfo = T_ROOM & T_CUSTOMER;

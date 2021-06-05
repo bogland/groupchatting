@@ -29,6 +29,8 @@ export const authentication = async (data: AuthDTO) => {
 
 export const checkAuth = async (token: string) => {
   const url = APIURI + "auth/check";
-  const res: Res<string> = await axios.get(url, { headers: { token: token } });
+  const res: Res<string> = await axios.get(url, {
+    headers: { Authorization: "Bearer " + token },
+  });
   return res.data;
 };

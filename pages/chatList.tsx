@@ -1,10 +1,12 @@
 import { setHeader } from "components/reducers/UIReducer";
 import { getRoomList } from "components/services/roomService";
-import React, { useEffect } from "react";
+import Head from "next/head";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { listen } from "socket.io";
 import useSWR from "swr";
 import styles from "./chatlist.module.scss";
+import moment from "moment";
 
 const chatlist = () => {
   const { data: chatList } = useSWR("chatList", getRoomList);
@@ -15,22 +17,48 @@ const chatlist = () => {
     dispatch(setHeader({ title: "방목록" }));
   }, []);
 
+  const Timer = ({ initTime = 0 }: { initTime: number }) => {
+    const [time, setTime] = useState<number>(initTime);
+    useEffect(() => {
+      const timer = setInterval(() => {
+        setTime((v) => v - 1);
+      }, 1000);
+      return () => {
+        clearInterval(timer);
+      };
+    }, []);
+    return <>{moment.utc(time * 1000).format("HH:mm:ss")}</>;
+  };
+
   return (
     <>
       <section>
-        <ul className={styles.roomContainer}>
+        <ul className={`container ${styles.roomContainer}`}>
           {chatList?.map((chat, index: number) => {
+            const remainedTime = moment
+              .duration(moment(chat.END_AT).diff(moment()))
+              .asSeconds();
+            console.log("remainedTime : ", remainedTime);
+            if (!remainedTime) return <></>;
             return (
               <li key={index} className={styles.room}>
                 <div className={styles.headerWrap}>
                   <span className={styles.category}>#취미</span>
-                  <span className={styles.timer}>{chat.DURING}</span>
+                  <span className={styles.timer}>
+                    <Timer
+                      initTime={moment
+                        .duration(moment(chat.END_AT).diff(moment()))
+                        .asSeconds()}
+                    />
+                  </span>
                 </div>
                 <div className={styles.title}>{chat.ROOM_NAME}</div>
                 <div className={styles.roomInfoWrap}>
                   <div className={styles.left}>
                     <span className={styles.count}>1/2</span>
-                    <span className={styles.visitTime}>{chat.CREATE_AT}</span>
+                    <span className={styles.visitTime}>
+                      {moment(chat.CREATE_AT).format("YYYY-MM-DD HH:mm")}
+                    </span>
                   </div>
                   <span className={styles.makerID}>{chat.CUSTOMER_NAME}</span>
                 </div>
