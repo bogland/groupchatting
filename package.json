@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.5.1",
+    "@toast-ui/react-editor": "^2.5.3",
     "@types/react": "^17.0.5",
     "axios": "^0.21.1",
     "babel-plugin-styled-components": "^1.12.0",
