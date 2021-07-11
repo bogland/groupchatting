@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./chatRoom.module.scss";
+import moment, { Moment } from "moment";
 
 type ChatInfo = {
   messageId: number;
@@ -11,6 +12,11 @@ type ChatInfo = {
 };
 
 const chatRoom = ({}) => {
+  const chatInputRef: any = useRef();
+  const chatWrapRef: any = useRef();
+  const [state, setState] = useState({
+    messageId: -1,
+  });
   const [dataList, setDataList] = useState([
     {
       messageId: 1,
@@ -29,17 +35,32 @@ const chatRoom = ({}) => {
       time: new Date(),
     },
   ]);
-  const [state, setState] = useState({
-    messageId: -1,
-  });
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    adjustChatWarpHeight();
+    window.addEventListener("resize", () => {
+      adjustChatWarpHeight();
+      chatScrollDown();
+    });
+  }, []);
+
+  const adjustChatWarpHeight = () => {
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty("--vh", `${vh}px`);
+  };
+
+  useEffect(() => {
+    chatScrollDown();
+  }, [dataList]);
 
   const onKeyDown = (e: any) => {
     const keyCode = e.keyCode;
     if (keyCode != 13) return;
 
-    const text = e.target.value;
+    sendMessage(e.target.value);
+  };
+
+  const sendMessage = (text: string) => {
     const chatInfo: ChatInfo = {
       isMine: true,
       message: text,
@@ -48,13 +69,15 @@ const chatRoom = ({}) => {
       userNickName: "Dummy(방장)",
       time: new Date(),
     };
-    console.log("time : ", seconds);
     setDataList((v) => v.concat(chatInfo));
-    e.target.value = "";
+    chatInputRef.current.value = "";
+    chatInputRef.current.focus();
+    chatScrollDown();
   };
 
   const changeToGapTime = (before: Date, now: Date) => {
-    const seconds = (before.getTime() - now.getTime()) / 1000;
+    let seconds = moment.duration(moment(before).diff(moment(now))).asSeconds();
+    seconds = Math.round(seconds);
     if (seconds < 60) {
       return seconds + "초전";
     } else if (seconds < 60 * 60) {
@@ -63,31 +86,40 @@ const chatRoom = ({}) => {
       return seconds + "일전";
     }
   };
+
+  const chatScrollDown = () => {
+    chatWrapRef.current.scrollTop = chatWrapRef.current.scrollHeight;
+  };
   return (
     <>
-      <section className={styles.chatWrap}>
-        <div className={styles.chatContainer}>
-          {dataList.map((data: ChatInfo) => {
-            return (
-              <div
-                className={`${styles.bubble} ${data.isMine && styles.mine}`}
-                key={data.messageId}
-              >
-                {!data.isMine && <span>{data.userNickName} :</span>}
-                <span>{data.message}</span>
-                <div>{data.time.toDateString("YYYY-MM-DD")}</div>
-              </div>
-            );
-          })}
-        </div>
+      <section ref={chatWrapRef} className={styles.chatWrap}>
+        {dataList.map((data: ChatInfo) => {
+          return (
+            <div
+              className={`${styles.bubble} ${data.isMine && styles.mine}`}
+              key={data.messageId}
+            >
+              {!data.isMine && <span>{data.userNickName} :</span>}
+              <span className={styles.message}>{data.message}</span>
+              <div>{moment(data.time).format("HH:mm")}</div>
+            </div>
+          );
+        })}
       </section>
+
       <section className={styles.chatInputWrap}>
         <input
+          ref={chatInputRef}
           type="text"
           placeholder="채팅을 입력하세요."
           onKeyDown={(e) => onKeyDown(e)}
         />
-        <span className={styles.confirm}>전송</span>
+        <span
+          className={styles.confirm}
+          onClick={() => sendMessage(chatInputRef.current.value)}
+        >
+          전송
+        </span>
       </section>
     </>
   );
