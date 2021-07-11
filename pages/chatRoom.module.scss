@@ -1,0 +1,27 @@
+.chatWrap {
+  background-color: rgb(252, 255, 247);
+  height: calc(50vh);
+}
+
+.chatContainer {
+  margin: 10px 10px;
+  display: flex;
+  flex-direction: column;
+
+  .bubble {
+  }
+  .bubble + .mine {
+    text-align: right;
+  }
+}
+
+.chatInputWrap {
+  width: 100vw;
+  display: flex;
+  input {
+    width: 100%;
+  }
+  .confirm {
+    flex-basis: 50px;
+  }
+}
