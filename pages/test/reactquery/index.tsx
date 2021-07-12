@@ -1,18 +1,15 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
-import {
-  useQuery,
-} from 'react-query';
+import { useQuery } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
-type Props={
-}
-const reactquery = (props:Props) => {
+type Props = {};
+const reactquery = (props: Props) => {
   const { data } = useQuery(
     ['testApi'],
     async () => {
-      const { data } = await axios.get('/api/test');
+      const { data } = await axios.get('/api/testapi');
       return data;
     },
     {
