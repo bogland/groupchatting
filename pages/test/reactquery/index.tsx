@@ -1,26 +1,28 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
-import { useQuery } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
 type Props = {};
 const reactquery = (props: Props) => {
-  const { data } = useQuery(
+  const queryClient = useQueryClient();
+  const { data, status } = useQuery(
     ['testApi'],
     async () => {
-      const { data } = await axios.get('/api/testapi');
+      const { data } = await axios.get('/api/test');
       return data;
     },
     {
-      staleTime: 5 * 60 * 1000 //5분간 리프레쉬 발생안함
+      staleTime: 5 * 60 * 1000, //5분간 리프레쉬 발생안함
+      retry: 5, //실패시 5번
+      retryDelay: 1000 //1초 간격으로
     }
   );
+
   useEffect(() => {
-    return () => {
-      alert('index 페이지 unmount');
-    };
-  });
+    if (status === 'error') console.log('에러');
+  }, [status]);
 
   return (
     <>
