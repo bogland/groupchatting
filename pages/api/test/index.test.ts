@@ -1,8 +1,11 @@
 import React from 'react';
 import testapi from './index';
 import axios from 'axios';
+import { TESTAPIURI } from 'config';
 
-test('test api', async () => {
-  let res: any = await axios.get('/api/test');
-  expect(res.id).toBe(0);
+describe('TEST Test API ', () => {
+  it('test api 1 sample', async () => {
+    const res: any = await axios.get(TESTAPIURI + 'api/test');
+    expect(res.data.id).toBe(0);
+  });
 });

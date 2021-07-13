@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "jest --watch"
+    "test": "jest --watch --modulePaths=."
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.5.1",
@@ -23,7 +23,7 @@
     "react-query": "3.18.1",
     "react-redux": "^7.2.4",
     "redux": "^4.1.0",
-    "redux-devtools-extension": "^2.13.9",
+    "redux-devtools-extension": "2.13.9",
     "sass": "^1.32.11",
     "socket.io": "2.4.1",
     "socket.io-client": "2.4.0",

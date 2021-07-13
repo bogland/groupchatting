@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from "react";
-import Head from "next/head";
-import styled, { css, createGlobalStyle } from "styled-components";
-import router from "next/router";
-import Axios from "axios";
-import styles from "./index.module.scss";
-import { APIURI } from "config";
-import { useDispatch, useSelector } from "react-redux";
-import { RootReducerType } from "components/store/RootReducer";
-import { setAuth } from "components/reducers/AuthReducer";
-import { setHeader } from "components/reducers/UIReducer";
-import { authentication, checkAuth } from "components/services/authService";
-import { ErrorCode } from "components/services/model";
+import React, { useEffect, useState } from 'react';
+import Head from 'next/head';
+import styled, { css, createGlobalStyle } from 'styled-components';
+import router from 'next/router';
+import Axios from 'axios';
+import styles from './index.module.scss';
+import { APIURI } from 'config';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootReducerType } from 'components/store/RootReducer';
+import { setAuth } from 'components/reducers/AuthReducer';
+import { setHeader } from 'components/reducers/UIReducer';
+import { authentication, checkAuth } from 'components/services/authService';
+import { ErrorCode } from 'components/services/model';
 
 type State = {
   loginTab: boolean; //0: Temp, 1: Member
@@ -21,11 +21,11 @@ const index = () => {
   const dispatch = useDispatch();
   const [state, setState] = useState<State>({
     loginTab: false,
-    token: null,
+    token: null
   });
 
   useEffect(() => {
-    dispatch(setHeader({ title: "로그인" }));
+    dispatch(setHeader({ title: '로그인' }));
     authenticate();
   }, []);
 
@@ -36,18 +36,18 @@ const index = () => {
     const res = await checkAuth(token);
     if (res.errorCode == ErrorCode.Error) return;
     dispatch(setAuth({ token: localStorage.token }));
-    router.push("/chatList");
+    router.push('/chatList');
   };
 
   const submitSuccess = async (e: any) => {
     e.preventDefault();
     const { id, pw } = e.target;
-    if (id.value == "") return;
+    if (id.value == '') return;
 
     const data = {
       memberType: 0, //0: guest
       id: id?.value ?? null,
-      password: pw?.value ?? null,
+      password: pw?.value ?? null
     };
     const res = await authentication(data);
 
@@ -55,27 +55,37 @@ const index = () => {
     const token = res.data;
     dispatch(setAuth({ token: token }));
     localStorage.token = token;
-    router.push("/chatList");
+    router.push('/chatList');
   };
   return (
     <>
       <header className={styles.header}></header>
       <section className={styles.title}>
-        <div style={{ marginRight: "auto", marginBottom: "1d0px" }}>
+        <div style={{ marginRight: 'auto', marginBottom: '1d0px' }}>
           welcome to Your Visiting~
         </div>
-        <div style={{ marginLeft: "auto" }}>It's for everyone to Communicate</div>
+        <div style={{ marginLeft: 'auto' }}>
+          It's for everyone to Communicate
+        </div>
       </section>
       <section className={styles.login}>
         <form onSubmit={(e: any) => submitSuccess(e)}>
           <ul
             className={styles.tabWrap}
-            onClick={() => setState((v) => ({ ...v, loginTab: !v.loginTab }))}
+            onClick={() => setState(v => ({ ...v, loginTab: !v.loginTab }))}
           >
-            <li className={`${styles.tab} ${state.loginTab ? `${styles.on}` : ""}`}>
+            <li
+              className={`${styles.tab} ${
+                state.loginTab ? `${styles.on}` : ''
+              }`}
+            >
               Guest
             </li>
-            <li className={`${styles.tab} ${!state.loginTab ? `${styles.on}` : ""}`}>
+            <li
+              className={`${styles.tab} ${
+                !state.loginTab ? `${styles.on}` : ''
+              }`}
+            >
               Login
             </li>
           </ul>
