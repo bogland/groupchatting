@@ -15,7 +15,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <Header />
+        {/* <Header /> */}
         <Component {...pageProps} />
         <Footer />
       </QueryClientProvider>
