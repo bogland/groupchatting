@@ -2,7 +2,7 @@ import {
   ChatListDTO,
   ChatWriteDTO,
   getChatList,
-  writeChat
+  writeChat\
 } from 'components/services/chatService';
 import React, { useEffect } from 'react';
 

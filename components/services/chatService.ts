@@ -28,16 +28,21 @@ export const getChatList: any = async (
   token: string,
   chatListDTO: ChatListDTO = chatListDTODefault
 ) => {
-  await axios.get(APIURI + 'chat/list?' + QueryString.stringify(chatListDTO), {
-    headers: { Authorization: 'Bearer ' + token }
-  });
+  const res = await axios.get(
+    APIURI + 'chat/list?' + QueryString.stringify(chatListDTO),
+    {
+      headers: { Authorization: 'Bearer ' + token }
+    }
+  );
+  return res.data;
 };
 
 export const writeChat: any = async (
   token: string,
   data: ChatWriteDTO = ChatWriteDTODefault
 ) => {
-  await axios.post(APIURI + 'chat/write', data, {
+  const res = await axios.post(APIURI + 'chat/write', data, {
     headers: { Authorization: 'Bearer ' + token }
   });
+  return res.data;
 };

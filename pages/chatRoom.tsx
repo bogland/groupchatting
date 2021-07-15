@@ -1,44 +1,89 @@
-import React, { useEffect, useRef, useState } from "react";
-import styles from "./chatRoom.module.scss";
-import moment, { Moment } from "moment";
+import React, { useEffect, useRef, useState } from 'react';
+import styles from './chatRoom.module.scss';
+import moment, { Moment } from 'moment';
+import { useSelector } from 'react-redux';
+import { RootReducerType } from 'components/store/RootReducer';
+import {
+  ChatListDTO,
+  ChatWriteDTO,
+  getChatList,
+  writeChat
+} from 'components/services/chatService';
+import axios from 'axios';
+import { useQuery } from 'react-query';
 
 type ChatInfo = {
-  messageId: number;
-  userId: number;
-  userNickName: string;
-  isMine: boolean;
-  message: string;
-  time: Date;
+  CHAT_ID: number;
+  CUSTOMER_ID: number;
+  CUSTOMER_NAME: string;
+  ISMINE: boolean;
+  MESSAGE: string;
+  TIME: Date;
 };
 
 const chatRoom = ({}) => {
+  const { token } = useSelector((state: RootReducerType) => state.auth);
   const chatInputRef: any = useRef();
   const chatWrapRef: any = useRef();
   const [state, setState] = useState({
-    messageId: -1,
+    messageId: -1
   });
-  const [dataList, setDataList] = useState([
-    {
-      messageId: 1,
-      userId: 10,
-      userNickName: "손님",
-      isMine: false,
-      message: "안녕하세요.",
-      time: new Date(),
+  // const [dataList, setDataList] = useState([
+  //   {
+  //     messageId: 1,
+  //     userId: 10,
+  //     userNickName: '손님',
+  //     isMine: false,
+  //     message: '안녕하세요.',
+  //     time: new Date()
+  //   },
+  //   {
+  //     messageId: 2,
+  //     userId: 66,
+  //     userNickName: '방장',
+  //     isMine: true,
+  //     message: '안녕하세요. 방장입니다.',
+  //     time: new Date()
+  //   }
+  // ]);
+
+  const { data: dataList = [], status } = useQuery(
+    ['chatList'],
+    async () => {
+      const data: ChatListDTO = {
+        pageNumber: 10,
+        pageIndex: 0,
+        roomId: 1
+      };
+      console.log('token : ', token);
+      const res: any = await getChatList(token, data);
+      console.log('api data : ', res);
+      return res.data;
     },
     {
-      messageId: 2,
-      userId: 66,
-      userNickName: "방장",
-      isMine: true,
-      message: "안녕하세요. 방장입니다.",
-      time: new Date(),
-    },
-  ]);
+      retry: 5, //실패시 5번
+      retryDelay: 1000 //1초 간격으로
+    }
+  );
+  console.log('dataList : ', dataList);
+  // const loadChatList = async () => {
+  //   const data: ChatListDTO = {
+  //     pageNumber: 10,
+  //     pageIndex: 0,
+  //     roomId: 1
+  //   };
+  //   console.log('token : ', token);
+  //   const res: any = await getChatList(token, data);
+  //   console.log(res);
+  // };
 
   useEffect(() => {
+    const dataWrite: ChatWriteDTO = {
+      message: '안녕하세요.',
+      roomId: 1
+    };
     adjustChatWarpHeight();
-    window.addEventListener("resize", () => {
+    window.addEventListener('resize', () => {
       adjustChatWarpHeight();
       chatScrollDown();
     });
@@ -46,7 +91,7 @@ const chatRoom = ({}) => {
 
   const adjustChatWarpHeight = () => {
     let vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty("--vh", `${vh}px`);
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
   };
 
   useEffect(() => {
@@ -60,30 +105,35 @@ const chatRoom = ({}) => {
     sendMessage(e.target.value);
   };
 
-  const sendMessage = (text: string) => {
+  const sendMessage = async (text: string) => {
     const chatInfo: ChatInfo = {
       isMine: true,
       message: text,
       messageId: -1,
       userId: 0,
-      userNickName: "Dummy(방장)",
-      time: new Date(),
+      userNickName: 'Dummy(방장)',
+      time: new Date()
     };
-    setDataList((v) => v.concat(chatInfo));
-    chatInputRef.current.value = "";
+    // setDataList(v => v.concat(chatInfo));
+    chatInputRef.current.value = '';
     chatInputRef.current.focus();
     chatScrollDown();
+    const data: ChatWriteDTO = {
+      roomId: 1,
+      message: text
+    };
+    const resWrite: any = await writeChat(token, data);
   };
 
   const changeToGapTime = (before: Date, now: Date) => {
     let seconds = moment.duration(moment(before).diff(moment(now))).asSeconds();
     seconds = Math.round(seconds);
     if (seconds < 60) {
-      return seconds + "초전";
+      return seconds + '초전';
     } else if (seconds < 60 * 60) {
-      return seconds + "분전";
+      return seconds + '분전';
     } else if (seconds < 60 * 60 * 24) {
-      return seconds + "일전";
+      return seconds + '일전';
     }
   };
 
@@ -93,15 +143,15 @@ const chatRoom = ({}) => {
   return (
     <>
       <section ref={chatWrapRef} className={styles.chatWrap}>
-        {dataList.map((data: ChatInfo) => {
+        {dataList?.map((data: ChatInfo) => {
           return (
             <div
-              className={`${styles.bubble} ${data.isMine && styles.mine}`}
-              key={data.messageId}
+              className={`${styles.bubble} ${data.ISMINE && styles.mine}`}
+              key={data.CHAT_ID}
             >
-              {!data.isMine && <span>{data.userNickName} :</span>}
-              <span className={styles.message}>{data.message}</span>
-              <div>{moment(data.time).format("HH:mm")}</div>
+              {!data.ISMINE && <span>{data.CUSTOMER_NAME} :</span>}
+              <span className={styles.message}>{data.MESSAGE}</span>
+              <div>{moment(data.TIME).format('HH:mm')}</div>
             </div>
           );
         })}
@@ -112,7 +162,7 @@ const chatRoom = ({}) => {
           ref={chatInputRef}
           type="text"
           placeholder="채팅을 입력하세요."
-          onKeyDown={(e) => onKeyDown(e)}
+          onKeyDown={e => onKeyDown(e)}
         />
         <span
           className={styles.confirm}
