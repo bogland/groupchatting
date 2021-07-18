@@ -9,8 +9,7 @@ import {
   getChatList,
   writeChat
 } from 'components/services/chatService';
-import axios from 'axios';
-import { useQuery } from 'react-query';
+import { QueryClient, useQuery } from 'react-query';
 
 type ChatInfo = {
   CHAT_ID: number;
@@ -23,42 +22,34 @@ type ChatInfo = {
 
 const chatRoom = ({}) => {
   const { token } = useSelector((state: RootReducerType) => state.auth);
+  const observerRef: any = useRef();
   const chatInputRef: any = useRef();
   const chatWrapRef: any = useRef();
   const [state, setState] = useState({
-    messageId: -1
+    chatId: 0,
+    pageIndex: 0,
+    pageNumber: 20
   });
-  // const [dataList, setDataList] = useState([
-  //   {
-  //     messageId: 1,
-  //     userId: 10,
-  //     userNickName: '손님',
-  //     isMine: false,
-  //     message: '안녕하세요.',
-  //     time: new Date()
-  //   },
-  //   {
-  //     messageId: 2,
-  //     userId: 66,
-  //     userNickName: '방장',
-  //     isMine: true,
-  //     message: '안녕하세요. 방장입니다.',
-  //     time: new Date()
-  //   }
-  // ]);
+  const [dataList, setDataList] = useState([]);
 
-  const { data: dataList = [], status } = useQuery(
-    ['chatList'],
+  const { status } = useQuery(
+    ['chatList', state.pageIndex],
     async () => {
+      if (!token) return;
       const data: ChatListDTO = {
-        pageNumber: 10,
-        pageIndex: 0,
-        roomId: 1
+        pageNumber: state.pageNumber,
+        pageIndex: state.pageIndex,
+        roomId: 1,
+        chatId: state.chatId
       };
-      console.log('token : ', token);
       const res: any = await getChatList(token, data);
-      console.log('api data : ', res);
-      return res.data;
+      console.log('res : ', res);
+      if (res.data.data?.length ?? 0 > 0) {
+        setDataList(v => v.concat(res.data.data));
+        console.log('data : ', res.data);
+        state.chatId = res.data.maxId;
+        console.log('maxId :', res.data.maxId);
+      }
     },
     {
       retry: 5, //실패시 5번
@@ -66,16 +57,6 @@ const chatRoom = ({}) => {
     }
   );
   console.log('dataList : ', dataList);
-  // const loadChatList = async () => {
-  //   const data: ChatListDTO = {
-  //     pageNumber: 10,
-  //     pageIndex: 0,
-  //     roomId: 1
-  //   };
-  //   console.log('token : ', token);
-  //   const res: any = await getChatList(token, data);
-  //   console.log(res);
-  // };
 
   useEffect(() => {
     const dataWrite: ChatWriteDTO = {
@@ -87,7 +68,22 @@ const chatRoom = ({}) => {
       adjustChatWarpHeight();
       chatScrollDown();
     });
+    observation();
   }, []);
+
+  const observation = () => {
+    let options = {
+      root: chatWrapRef.current,
+      rootMargin: '0px',
+      threshold: 1.0
+    };
+
+    let observer = new IntersectionObserver(() => {
+      state.pageIndex += 1;
+      console.log('ㅎㅇㅎㅇ');
+    }, options);
+    observer.observe(observerRef.current);
+  };
 
   const adjustChatWarpHeight = () => {
     let vh = window.innerHeight * 0.01;
@@ -106,15 +102,6 @@ const chatRoom = ({}) => {
   };
 
   const sendMessage = async (text: string) => {
-    const chatInfo: ChatInfo = {
-      isMine: true,
-      message: text,
-      messageId: -1,
-      userId: 0,
-      userNickName: 'Dummy(방장)',
-      time: new Date()
-    };
-    // setDataList(v => v.concat(chatInfo));
     chatInputRef.current.value = '';
     chatInputRef.current.focus();
     chatScrollDown();
@@ -140,9 +127,11 @@ const chatRoom = ({}) => {
   const chatScrollDown = () => {
     chatWrapRef.current.scrollTop = chatWrapRef.current.scrollHeight;
   };
+
   return (
     <>
       <section ref={chatWrapRef} className={styles.chatWrap}>
+        <div ref={observerRef}></div>
         {dataList?.map((data: ChatInfo) => {
           return (
             <div

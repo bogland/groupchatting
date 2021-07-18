@@ -50,7 +50,6 @@ const index = () => {
       password: pw?.value ?? null
     };
     const res = await authentication(data);
-
     if (res.errorCode == ErrorCode.Error) return;
     const token = res.data;
     dispatch(setAuth({ token: token }));

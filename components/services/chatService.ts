@@ -6,6 +6,7 @@ export type ChatListDTO = {
   pageNumber?: number;
   pageIndex: number;
   roomId: number;
+  chatId: number;
 };
 
 export type ChatWriteDTO = {
@@ -28,12 +29,10 @@ export const getChatList: any = async (
   token: string,
   chatListDTO: ChatListDTO = chatListDTODefault
 ) => {
-  const res = await axios.get(
-    APIURI + 'chat/list?' + QueryString.stringify(chatListDTO),
-    {
-      headers: { Authorization: 'Bearer ' + token }
-    }
-  );
+  const res = await axios.get(APIURI + 'chat/list', {
+    params: chatListDTO,
+    headers: { Authorization: 'Bearer ' + token }
+  });
   return res.data;
 };
 

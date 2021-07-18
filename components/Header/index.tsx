@@ -1,7 +1,7 @@
-import { RootReducerType } from "components/store/RootReducer";
-import React from "react";
-import { useSelector } from "react-redux";
-import styles from "./header.module.scss";
+import { RootReducerType } from 'components/store/RootReducer';
+import React from 'react';
+import { useSelector } from 'react-redux';
+import styles from './header.module.scss';
 type Props = {};
 
 const Header = (props: Props) => {

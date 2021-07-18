@@ -7,16 +7,22 @@ import 'public/css/reset.css';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import useAuth from 'components/util/useAuth';
 
 const store = configureStore({ reducer: RootReducer });
 const queryClient = new QueryClient();
+
+const PrePageLoad = ({ Component, pageProps }: any) => {
+  useAuth();
+  return <Component {...pageProps} />;
+};
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        {/* <Header /> */}
-        <Component {...pageProps} />
+        <Header />
+        <PrePageLoad Component={Component} pageProps={pageProps} />
         <Footer />
       </QueryClientProvider>
     </Provider>
