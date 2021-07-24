@@ -4,9 +4,9 @@ import QueryString from 'query-string';
 
 export type ChatListDTO = {
   pageNumber?: number;
-  pageIndex: number;
   roomId: number;
   chatId: number;
+  direction: number;
 };
 
 export type ChatWriteDTO = {
@@ -16,8 +16,9 @@ export type ChatWriteDTO = {
 
 const chatListDTODefault = {
   pageNumber: 10,
-  pageIndex: 0,
-  roomId: 1
+  roomId: 1,
+  chatId: 0,
+  direction: 0
 };
 
 const ChatWriteDTODefault = {

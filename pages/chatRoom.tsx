@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './chatRoom.module.scss';
 import moment, { Moment } from 'moment';
 import { useSelector } from 'react-redux';
@@ -10,6 +10,7 @@ import {
   writeChat
 } from 'components/services/chatService';
 import { QueryClient, useQuery } from 'react-query';
+import usePrevious from 'components/util/usePrevious';
 
 type ChatInfo = {
   CHAT_ID: number;
@@ -19,80 +20,88 @@ type ChatInfo = {
   MESSAGE: string;
   TIME: Date;
 };
-
+const queryClient = new QueryClient();
 const chatRoom = ({}) => {
   const { token } = useSelector((state: RootReducerType) => state.auth);
   const observerRef: any = useRef();
   const chatInputRef: any = useRef();
   const chatWrapRef: any = useRef();
   const [state, setState] = useState({
-    chatId: 0,
-    pageIndex: 0,
-    pageNumber: 20
+    chatId: { start: 0, end: 0 },
+    pageNumber: 20,
+    loading: true
   });
+  const preState = usePrevious(state);
   const [dataList, setDataList] = useState([]);
-
-  const { status } = useQuery(
-    ['chatList', state.pageIndex],
-    async () => {
-      if (!token) return;
-      const data: ChatListDTO = {
-        pageNumber: state.pageNumber,
-        pageIndex: state.pageIndex,
-        roomId: 1,
-        chatId: state.chatId
-      };
-      const res: any = await getChatList(token, data);
-      console.log('res : ', res);
-      if (res.data.data?.length ?? 0 > 0) {
-        setDataList(v => v.concat(res.data.data));
-        console.log('data : ', res.data);
-        state.chatId = res.data.maxId;
-        console.log('maxId :', res.data.maxId);
-      }
-    },
-    {
-      retry: 5, //실패시 5번
-      retryDelay: 1000 //1초 간격으로
-    }
-  );
   console.log('dataList : ', dataList);
 
-  useEffect(() => {
-    const dataWrite: ChatWriteDTO = {
-      message: '안녕하세요.',
-      roomId: 1
+  const loadChatList = async (chatId = 0, direction = 0) => {
+    if (!token) return;
+    const data: ChatListDTO = {
+      pageNumber: state.pageNumber,
+      roomId: 1,
+      chatId: chatId,
+      direction: direction //up=0 ,down=1
     };
+    const res: any = await getChatList(token, data);
+    if (res.data.data?.length ?? 0 > 0) {
+      const { start, end } = state.chatId;
+      const { resStart, resEnd } = res.data.chatId;
+      console.log(
+        'state chatId' +
+          JSON.stringify(state.chatId) +
+          ' res chatId:' +
+          JSON.stringify(res.data.chatId)
+      );
+      if (start <= resStart || end >= resEnd) return;
+      //위아래 추가 구분
+      if (direction == 0) setDataList(v => res.data.data.concat(v));
+      else setDataList(v => v.concat(res.data.data));
+      state.chatId = res.data.chatId;
+    }
+    return res.data.chatId;
+  };
+
+  useEffect(() => {
     adjustChatWarpHeight();
     window.addEventListener('resize', () => {
       adjustChatWarpHeight();
       chatScrollDown();
     });
-    observation();
-  }, []);
+    token &&
+      loadChatList(state.chatId.start, 0).then((chatId: any) => {
+        chatScrollDown();
+        state.chatId = chatId;
+      });
+  }, [token]);
 
-  const observation = () => {
+  const onScrollUp = () => {
+    console.log(dataList);
+    if (dataList.length == 0) return;
+    loadChatList(state.chatId.start, 0);
+  };
+
+  const startScrollObserve = () => {
+    if (dataList.length == 0 || token == null || state.loading) return;
     let options = {
       root: chatWrapRef.current,
-      rootMargin: '0px',
-      threshold: 1.0
+      rootMargin: '500px',
+      threshold: 0
     };
-
-    let observer = new IntersectionObserver(() => {
-      state.pageIndex += 1;
-      console.log('ㅎㅇㅎㅇ');
-    }, options);
-    observer.observe(observerRef.current);
+    state.observerObject = new IntersectionObserver(onScrollUp, options);
   };
+
+  useEffect(() => {
+    if (preState?.loading == state.loading) return;
+    state.observerObject?.disconnect();
+    startScrollObserve();
+    state.observerObject?.observe(observerRef.current);
+  }, [onScrollUp]);
 
   const adjustChatWarpHeight = () => {
     let vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
   };
-
-  useEffect(() => {
-    chatScrollDown();
-  }, [dataList]);
 
   const onKeyDown = (e: any) => {
     const keyCode = e.keyCode;
@@ -112,20 +121,12 @@ const chatRoom = ({}) => {
     const resWrite: any = await writeChat(token, data);
   };
 
-  const changeToGapTime = (before: Date, now: Date) => {
-    let seconds = moment.duration(moment(before).diff(moment(now))).asSeconds();
-    seconds = Math.round(seconds);
-    if (seconds < 60) {
-      return seconds + '초전';
-    } else if (seconds < 60 * 60) {
-      return seconds + '분전';
-    } else if (seconds < 60 * 60 * 24) {
-      return seconds + '일전';
-    }
-  };
-
   const chatScrollDown = () => {
     chatWrapRef.current.scrollTop = chatWrapRef.current.scrollHeight;
+    setTimeout(() => {
+      // state.loading = false;
+      setState(v => ({ ...v, loading: false }));
+    }, 0);
   };
 
   return (
