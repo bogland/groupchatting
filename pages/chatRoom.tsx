@@ -29,11 +29,9 @@ const chatRoom = ({}) => {
   const [state, setState] = useState({
     chatId: { start: 0, end: 0 },
     pageNumber: 20,
-    loading: true
+    dataList: []
   });
   const preState = usePrevious(state);
-  const [dataList, setDataList] = useState([]);
-  console.log('dataList : ', dataList);
 
   const loadChatList = async (chatId = 0, direction = 0) => {
     if (!token) return;
@@ -55,9 +53,19 @@ const chatRoom = ({}) => {
       );
       if (start <= resStart || end >= resEnd) return;
       //위아래 추가 구분
-      if (direction == 0) setDataList(v => res.data.data.concat(v));
-      else setDataList(v => v.concat(res.data.data));
       state.chatId = res.data.chatId;
+      if (direction == 0) {
+        // console.log('dataList : ', res.data.data.push(state.dataList));
+        state.dataList.unshift(...res.data.data);
+        setState(v => ({
+          ...state
+        }));
+      } else {
+        state.dataList.push(...res.data.data);
+        setState(v => ({
+          ...state
+        }));
+      }
     }
     return res.data.chatId;
   };
@@ -72,17 +80,19 @@ const chatRoom = ({}) => {
       loadChatList(state.chatId.start, 0).then((chatId: any) => {
         chatScrollDown();
         state.chatId = chatId;
+        startScrollObserve();
+        state.observerObject?.observe(observerRef.current);
       });
   }, [token]);
 
   const onScrollUp = () => {
-    console.log(dataList);
-    if (dataList.length == 0) return;
+    console.log('onSCroll dataList :', state.dataList);
+    if (state.dataList.length == 0) return;
     loadChatList(state.chatId.start, 0);
   };
 
   const startScrollObserve = () => {
-    if (dataList.length == 0 || token == null || state.loading) return;
+    if (state.dataList.length == 0 || token == null) return;
     let options = {
       root: chatWrapRef.current,
       rootMargin: '500px',
@@ -92,11 +102,11 @@ const chatRoom = ({}) => {
   };
 
   useEffect(() => {
-    if (preState?.loading == state.loading) return;
-    state.observerObject?.disconnect();
-    startScrollObserve();
-    state.observerObject?.observe(observerRef.current);
-  }, [onScrollUp]);
+    return () => {
+      console.log('끝');
+      state.observerObject?.disconnect();
+    };
+  }, []);
 
   const adjustChatWarpHeight = () => {
     let vh = window.innerHeight * 0.01;
@@ -123,17 +133,13 @@ const chatRoom = ({}) => {
 
   const chatScrollDown = () => {
     chatWrapRef.current.scrollTop = chatWrapRef.current.scrollHeight;
-    setTimeout(() => {
-      // state.loading = false;
-      setState(v => ({ ...v, loading: false }));
-    }, 0);
   };
 
   return (
     <>
       <section ref={chatWrapRef} className={styles.chatWrap}>
         <div ref={observerRef}></div>
-        {dataList?.map((data: ChatInfo) => {
+        {state.dataList?.map((data: ChatInfo) => {
           return (
             <div
               className={`${styles.bubble} ${data.ISMINE && styles.mine}`}
