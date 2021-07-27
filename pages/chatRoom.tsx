@@ -31,10 +31,11 @@ const chatRoom = ({}) => {
     pageNumber: 20,
     dataList: []
   });
-  const preState = usePrevious(state);
 
   const loadChatList = async (chatId = 0, direction = 0) => {
     if (!token) return;
+    console.log(state.chatId);
+    console.log(chatId);
     const data: ChatListDTO = {
       pageNumber: state.pageNumber,
       roomId: 1,
@@ -71,22 +72,20 @@ const chatRoom = ({}) => {
   };
 
   useEffect(() => {
+    if (!token) return;
     adjustChatWarpHeight();
     window.addEventListener('resize', () => {
       adjustChatWarpHeight();
       chatScrollDown();
     });
-    token &&
-      loadChatList(state.chatId.start, 0).then((chatId: any) => {
-        chatScrollDown();
-        state.chatId = chatId;
-        startScrollObserve();
-        state.observerObject?.observe(observerRef.current);
-      });
+    loadChatList(state.chatId.start, 0).then((chatId: any) => {
+      setTimeout(chatScrollDown, 50); //바로 스크롤 내리면 데이터가 없어서 안내려감
+      state.chatId = chatId;
+      startScrollObserve();
+    });
   }, [token]);
 
   const onScrollUp = () => {
-    console.log('onSCroll dataList :', state.dataList);
     if (state.dataList.length == 0) return;
     loadChatList(state.chatId.start, 0);
   };
@@ -99,6 +98,7 @@ const chatRoom = ({}) => {
       threshold: 0
     };
     state.observerObject = new IntersectionObserver(onScrollUp, options);
+    state.observerObject?.observe(observerRef.current);
   };
 
   useEffect(() => {
