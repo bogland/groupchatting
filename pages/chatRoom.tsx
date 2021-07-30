@@ -9,7 +9,6 @@ import {
   getChatList,
   writeChat
 } from 'components/services/chatService';
-import { QueryClient, useQuery } from 'react-query';
 import usePrevious from 'components/util/usePrevious';
 
 type ChatInfo = {
@@ -20,7 +19,6 @@ type ChatInfo = {
   MESSAGE: string;
   TIME: Date;
 };
-const queryClient = new QueryClient();
 const chatRoom = ({}) => {
   const { token } = useSelector((state: RootReducerType) => state.auth);
   const observerRef: any = useRef();
