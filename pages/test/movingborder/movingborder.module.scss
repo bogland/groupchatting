@@ -1,0 +1,17 @@
+.table.header {
+  border: solid;
+  display: flex;
+  border-collapse: collapse;
+  .drag {
+    border-right: solid 5px;
+  }
+  .drag:hover {
+    background-color: yellow;
+    cursor: grab;
+  }
+  .drag:active {
+    cursor: grabbing;
+  }
+  .headerContent {
+  }
+}
