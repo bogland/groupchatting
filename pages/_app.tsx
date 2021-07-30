@@ -8,6 +8,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import useAuth from 'components/util/useAuth';
+import { RecoilRoot } from 'recoil';
 
 const store = configureStore({ reducer: RootReducer });
 const queryClient = new QueryClient();
@@ -19,13 +20,15 @@ const PrePageLoad = ({ Component, pageProps }: any) => {
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
   return (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <Header />
-        <PrePageLoad Component={Component} pageProps={pageProps} />
-        <Footer />
-      </QueryClientProvider>
-    </Provider>
+    <RecoilRoot>
+      <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
+          <Header />
+          <PrePageLoad Component={Component} pageProps={pageProps} />
+          <Footer />
+        </QueryClientProvider>
+      </Provider>
+    </RecoilRoot>
   );
 };
 export default MyApp;
