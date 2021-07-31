@@ -1,17 +1,28 @@
-.table.header {
+.header {
+  height:20px;
   border: solid;
   display: flex;
   border-collapse: collapse;
   .drag {
-    border-right: solid 5px;
+    height:100%;
+    border-right: solid 5;
   }
-  .drag:hover {
-    background-color: yellow;
-    cursor: grab;
+}
+.headerContent{
+  position:relative;
+}
+
+.draggable{
+  position:absolute;
+  top:0;
+  right:0;
+  width:5px;
+  height:20px;
+  &:hover{
+    cursor:grabbing;
   }
-  .drag:active {
-    cursor: grabbing;
-  }
-  .headerContent {
-  }
+}
+
+.row{
+  display:flex;
 }
