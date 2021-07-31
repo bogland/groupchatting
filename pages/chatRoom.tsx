@@ -77,7 +77,8 @@ const chatRoom = ({}) => {
       chatScrollDown();
     });
     loadChatList(state.chatId.start, 0).then((chatId: any) => {
-      setTimeout(chatScrollDown, 50); //바로 스크롤 내리면 데이터가 없어서 안내려감
+      chatScrollDown(); // 갑자기 잘내려감
+      // setTimeout(chatScrollDown, 50); //바로 스크롤 내리면 데이터가 없어서 안내려감
       state.chatId = chatId;
       startScrollObserve();
     });
